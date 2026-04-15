@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PrecificaFacil, type PrecificaFacilState } from "@/components/PrecificaFacil";
 import { ScenarioSimulator } from "@/components/ScenarioSimulator";
+import { Calculator } from "lucide-react";
 
 function App() {
   const [pricingState, setPricingState] = useState<PrecificaFacilState>({
@@ -11,34 +12,29 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+      <header className="border-b border-border bg-card shadow-sm sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-sm">
+              <Calculator className="w-5 h-5 text-white" strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-lg font-bold text-foreground leading-none tracking-tight">Precifica Fácil</h1>
+              <p className="text-xs text-muted-foreground font-medium mt-0.5">Calculadora de Margem & Preço</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground leading-tight">Precifica Facil</h1>
-            <p className="text-xs text-muted-foreground">Calcule o preco ideal para seus produtos</p>
+          <div className="hidden sm:flex items-center gap-4 text-sm font-medium text-muted-foreground">
+            <span>Precificação Simples</span>
+            <div className="w-1 h-1 rounded-full bg-border" />
+            <span>Simulador de Cenários</span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 lg:py-10 space-y-12">
         <PrecificaFacil onStateChange={setPricingState} />
 
-        <div className="my-10 border-t border-border" />
+        <div className="border-t border-border/60" />
 
         <ScenarioSimulator
           basePrice={pricingState.sellingPrice}
@@ -46,9 +42,11 @@ function App() {
           isValid={pricingState.isValid}
         />
 
-        <p className="text-center text-xs text-muted-foreground mt-10 pb-4">
-          Precifica Facil — Calculos em tempo real. Os valores sao estimativas para fins de gestao.
-        </p>
+        <footer className="text-center text-sm text-muted-foreground pt-12 pb-8 border-t border-border/40">
+          <p>
+            Precifica Fácil — Cálculos em tempo real. Os valores são estimativas para fins de gestão.
+          </p>
+        </footer>
       </main>
     </div>
   );
