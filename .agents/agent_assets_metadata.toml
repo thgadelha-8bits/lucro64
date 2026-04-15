@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "ELXNRVu8lZpz1K-sJjKWH"
+uri = "file://PRD-precifica-facil.md"
+type = "text"
+title = "PRD — Precifica Fácil v1.0"
