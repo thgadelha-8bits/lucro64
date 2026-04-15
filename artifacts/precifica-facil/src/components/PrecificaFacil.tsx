@@ -278,25 +278,79 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border/50">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-foreground">Fator Markup</span>
-                      <span className="text-xs font-medium text-muted-foreground">Multiplicador sobre o custo</span>
-                    </div>
-                    <span className="text-base font-bold tabular-nums text-primary bg-primary/10 px-3 py-1 rounded-md">
-                      {formatMarkupPercent(result.markupPercent)}
-                    </span>
+                {/* Detailed breakdown */}
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <div className="px-4 py-2.5 bg-muted/40 border-b border-border">
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Composição do Preço</span>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border/50">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-foreground">Total de Deduções</span>
-                      <span className="text-xs font-medium text-muted-foreground">Impostos + Taxas + Custos</span>
+                  <div className="divide-y divide-border/60">
+                    {/* Header row */}
+                    <div className="grid grid-cols-3 px-4 py-2 bg-muted/20">
+                      <span className="text-xs font-bold text-muted-foreground">Item</span>
+                      <span className="text-xs font-bold text-muted-foreground text-center">%</span>
+                      <span className="text-xs font-bold text-muted-foreground text-right">Valor</span>
                     </div>
-                    <span className="text-base font-bold tabular-nums text-foreground">
-                      {formatPercent(result.totalExpensesPercent)}
-                    </span>
+                    {/* Cost row */}
+                    <div className="grid grid-cols-3 px-4 py-2.5 items-center">
+                      <span className="text-sm font-semibold text-foreground">Custo</span>
+                      <span className="text-sm tabular-nums text-center text-muted-foreground">{formatPercent(result.costPercent, 1)}</span>
+                      <span className="text-sm font-semibold tabular-nums text-right text-foreground">{formatCurrency(inputs.cost)}</span>
+                    </div>
+                    {/* Tax row */}
+                    {inputs.taxPercent > 0 && taxType === "simples" && (
+                      <div className="grid grid-cols-3 px-4 py-2.5 items-center bg-red-50/40">
+                        <span className="text-sm font-semibold text-red-700">Imposto</span>
+                        <span className="text-sm tabular-nums text-center text-red-500">{formatPercent(result.taxPercent, 1)}</span>
+                        <span className="text-sm font-semibold tabular-nums text-right text-red-700">{formatCurrency(result.taxAmount)}</span>
+                      </div>
+                    )}
+                    {/* Card fee row */}
+                    {inputs.cardPercent > 0 && (
+                      <div className="grid grid-cols-3 px-4 py-2.5 items-center bg-red-50/40">
+                        <span className="text-sm font-semibold text-red-700">Taxa Cartão</span>
+                        <span className="text-sm tabular-nums text-center text-red-500">{formatPercent(inputs.cardPercent, 1)}</span>
+                        <span className="text-sm font-semibold tabular-nums text-right text-red-700">{formatCurrency(result.sellingPrice * inputs.cardPercent / 100)}</span>
+                      </div>
+                    )}
+                    {/* Commission row */}
+                    {inputs.commissionPercent > 0 && (
+                      <div className="grid grid-cols-3 px-4 py-2.5 items-center bg-red-50/40">
+                        <span className="text-sm font-semibold text-red-700">Comissão</span>
+                        <span className="text-sm tabular-nums text-center text-red-500">{formatPercent(inputs.commissionPercent, 1)}</span>
+                        <span className="text-sm font-semibold tabular-nums text-right text-red-700">{formatCurrency(result.sellingPrice * inputs.commissionPercent / 100)}</span>
+                      </div>
+                    )}
+                    {/* Operational row */}
+                    {inputs.operationalPercent > 0 && (
+                      <div className="grid grid-cols-3 px-4 py-2.5 items-center bg-orange-50/40">
+                        <span className="text-sm font-semibold text-orange-700">Custo Op.</span>
+                        <span className="text-sm tabular-nums text-center text-orange-500">{formatPercent(inputs.operationalPercent, 1)}</span>
+                        <span className="text-sm font-semibold tabular-nums text-right text-orange-700">{formatCurrency(result.operationalAmount)}</span>
+                      </div>
+                    )}
+                    {/* Profit row */}
+                    <div className="grid grid-cols-3 px-4 py-2.5 items-center bg-emerald-50/40">
+                      <span className="text-sm font-semibold text-emerald-700">Lucro</span>
+                      <span className="text-sm tabular-nums text-center text-emerald-600">{formatPercent(inputs.profitPercent, 1)}</span>
+                      <span className="text-sm font-semibold tabular-nums text-right text-emerald-700">{formatCurrency(result.profitAmountChart)}</span>
+                    </div>
+                    {/* Total row */}
+                    <div className="grid grid-cols-3 px-4 py-3 items-center bg-muted/30 border-t border-border">
+                      <span className="text-sm font-bold text-foreground">Total</span>
+                      <span className="text-sm font-bold tabular-nums text-center text-foreground">100%</span>
+                      <span className="text-sm font-bold tabular-nums text-right text-foreground">{formatCurrency(result.sellingPrice)}</span>
+                    </div>
                   </div>
+                </div>
+
+                <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-muted/50 border border-border/50">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-foreground">Fator Markup (ERP)</span>
+                    <span className="text-xs font-medium text-muted-foreground">% sobre o custo para uso externo</span>
+                  </div>
+                  <span className="text-base font-bold tabular-nums text-primary bg-primary/10 px-3 py-1 rounded-md">
+                    {formatMarkupPercent(result.markupPercent)}
+                  </span>
                 </div>
 
                 <button
