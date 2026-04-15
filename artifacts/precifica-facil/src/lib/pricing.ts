@@ -1,7 +1,6 @@
-export type TaxType = "simples" | "st" | "isento";
+export type TaxType = "simples" | "st";
 
 export interface PricingInputs {
-  productName: string;
   cost: number;
   taxType: TaxType;
   taxPercent: number;
@@ -16,6 +15,7 @@ export interface PricingResult {
   profitAmount: number;
   profitPercentActual: number;
   markup: number;
+  markupPercent: number;
   totalExpensesPercent: number;
   costPercent: number;
   taxAmount: number;
@@ -42,8 +42,8 @@ export function calculatePricing(inputs: PricingInputs): PricingResult {
 
   const taxPercent = taxType === "simples" ? rawTaxPercent : 0;
   const taxNote =
-    taxType === "st" || taxType === "isento"
-      ? "Imposto ja considerado no custo ou nao aplicavel"
+    taxType === "st"
+      ? "Imposto ja incluido no custo de aquisicao (ST)"
       : null;
 
   const totalDeductions =
@@ -55,6 +55,7 @@ export function calculatePricing(inputs: PricingInputs): PricingResult {
       profitAmount: 0,
       profitPercentActual: 0,
       markup: 0,
+      markupPercent: 0,
       totalExpensesPercent: totalDeductions,
       costPercent: 0,
       taxAmount: 0,
@@ -76,6 +77,7 @@ export function calculatePricing(inputs: PricingInputs): PricingResult {
       profitAmount: 0,
       profitPercentActual: 0,
       markup: 0,
+      markupPercent: 0,
       totalExpensesPercent: totalDeductions,
       costPercent: 0,
       taxAmount: 0,
@@ -101,6 +103,7 @@ export function calculatePricing(inputs: PricingInputs): PricingResult {
   const profitAmount = sellingPrice - cost - taxesAndFeesAmount - operationalAmount;
   const profitPercentActual = (profitAmount / sellingPrice) * 100;
   const markup = sellingPrice / cost;
+  const markupPercent = (markup - 1) * 100;
   const costPercent = (cost / sellingPrice) * 100;
 
   return {
@@ -108,6 +111,7 @@ export function calculatePricing(inputs: PricingInputs): PricingResult {
     profitAmount,
     profitPercentActual,
     markup,
+    markupPercent,
     totalExpensesPercent: totalDeductions,
     costPercent,
     taxAmount,
@@ -135,6 +139,6 @@ export function formatPercent(value: number, decimals = 2): string {
   return `${value.toFixed(decimals)}%`;
 }
 
-export function formatMarkup(value: number): string {
-  return `${value.toFixed(2)}x`;
+export function formatMarkupPercent(markupPercent: number): string {
+  return `${markupPercent.toFixed(2)}%`;
 }
