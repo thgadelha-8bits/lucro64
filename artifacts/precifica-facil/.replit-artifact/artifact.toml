@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Precifica Fácil"
+version = "1.0.0"
+id = "artifacts/precifica-facil"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22329
+
+[services.development]
+run = "pnpm --filter @workspace/precifica-facil run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/precifica-facil", "run", "build" ]
+publicDir = "artifacts/precifica-facil/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22329"
+BASE_PATH = "/"
