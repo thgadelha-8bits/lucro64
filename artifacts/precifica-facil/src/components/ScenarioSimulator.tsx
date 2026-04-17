@@ -148,8 +148,8 @@ function ScenarioCard({ config, idx, basePrice, cost, cardPercent }: {
           )}
           {idx === 2 && (
             <div className="grid grid-cols-2 gap-2">
-              <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" isHighlighted={isHighlighted} />
-              <SmallInput label="Parcela." value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
+              <SmallInput label="Taxa maquininha" value={cardFee12x} onChange={setCardFee12x} suffix="%" isHighlighted={isHighlighted} />
+              <SmallInput label="Taxa parcelamento" value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
             </div>
           )}
         </div>
