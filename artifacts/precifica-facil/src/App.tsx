@@ -36,6 +36,12 @@ function App() {
           />
         </div>
       </main>
+
+      <footer className="flex-shrink-0 border-t border-border bg-card px-5 py-1.5 text-center">
+        <p className="text-xs text-muted-foreground">
+          Desenvolvido ❤️ por Th Gadelha · 8Bits Tecnologia
+        </p>
+      </footer>
     </div>
   );
 }
