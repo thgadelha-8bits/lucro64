@@ -1,10 +1,12 @@
 import {
-  PieChart,
-  Pie,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
   Cell,
   Tooltip,
   ResponsiveContainer,
-  Legend,
+  LabelList,
 } from "recharts";
 import { PricingResult } from "@/lib/pricing";
 import { formatCurrency, formatPercent } from "@/lib/pricing";
@@ -20,51 +22,13 @@ interface PriceChartProps {
   profitPercent: number;
 }
 
-// Colors derived from the new theme palette
-const COLORS = [
-  "hsl(243 75% 59%)", // Primary Indigo
-  "hsl(172 66% 50%)", // Teal
-  "hsl(45 93% 47%)",  // Yellow
-  "hsl(280 65% 60%)", // Purple
-  "hsl(0 84% 60%)",   // Red/Destructive
-];
-
-const renderCustomizedLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-}) => {
-  if (percent < 0.05) return null;
-  const RADIAN = Math.PI / 180;
-  // Adjust radius for donut chart
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor="middle"
-      dominantBaseline="central"
-      fontSize={12}
-      fontWeight={700}
-      style={{ textShadow: "0px 1px 2px rgba(0,0,0,0.4)" }}
-    >
-      {`${(percent * 100).toFixed(1)}%`}
-    </text>
-  );
+const ITEM_COLORS: Record<string, string> = {
+  Custo: "#6366f1",
+  Imposto: "#ef4444",
+  "Taxa Cartão": "#f97316",
+  Comissão: "#ec4899",
+  "Op. Fixo": "#f59e0b",
+  Lucro: "#10b981",
 };
 
 export function PriceChart({
@@ -79,109 +43,72 @@ export function PriceChart({
 }: PriceChartProps) {
   if (!result.isValid || result.sellingPrice <= 0) {
     return (
-      <div className="flex items-center justify-center h-[260px] text-muted-foreground/60 text-sm font-medium border border-dashed rounded-xl">
-        Preencha os dados para visualizar o gráfico
+      <div className="flex items-center justify-center h-[80px] text-muted-foreground/50 text-xs font-medium">
+        Preencha os dados para visualizar
       </div>
     );
   }
 
   const effectiveTaxPercent = taxType === "simples" ? taxPercent : 0;
-  const feesPercent = cardPercent + commissionPercent;
 
   const data = [
-    {
-      name: "Custo",
-      value: result.costPercent,
-      amount: costValue,
-    },
-    ...(effectiveTaxPercent > 0
-      ? [
-          {
-            name: "Imposto",
-            value: effectiveTaxPercent,
-            amount: result.taxAmount,
-          },
-        ]
-      : []),
-    ...(feesPercent > 0
-      ? [
-          {
-            name: "Taxas (Cartão + Comissão)",
-            value: feesPercent,
-            amount: result.sellingPrice * (feesPercent / 100),
-          },
-        ]
-      : []),
-    ...(operationalPercent > 0
-      ? [
-          {
-            name: "Despesas Operacionais",
-            value: operationalPercent,
-            amount: result.operationalAmount,
-          },
-        ]
-      : []),
-    ...(profitPercent > 0
-      ? [
-          {
-            name: "Lucro Bruto",
-            value: profitPercent,
-            amount: result.profitAmountChart,
-          },
-        ]
-      : []),
+    { name: "Custo", value: result.costPercent, amount: costValue },
+    ...(effectiveTaxPercent > 0 ? [{ name: "Imposto", value: effectiveTaxPercent, amount: result.taxAmount }] : []),
+    ...(cardPercent > 0 ? [{ name: "Taxa Cartão", value: cardPercent, amount: result.sellingPrice * cardPercent / 100 }] : []),
+    ...(commissionPercent > 0 ? [{ name: "Comissão", value: commissionPercent, amount: result.sellingPrice * commissionPercent / 100 }] : []),
+    ...(operationalPercent > 0 ? [{ name: "Op. Fixo", value: operationalPercent, amount: result.operationalAmount }] : []),
+    ...(profitPercent > 0 ? [{ name: "Lucro", value: profitPercent, amount: result.profitAmountChart }] : []),
   ].filter((d) => d.value > 0);
 
+  const chartHeight = Math.max(data.length * 28 + 8, 80);
+
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="45%"
-          labelLine={false}
-          label={renderCustomizedLabel}
-          innerRadius={60}
-          outerRadius={100}
-          paddingAngle={2}
-          dataKey="value"
-          stroke="none"
-        >
-          {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
+    <ResponsiveContainer width="100%" height={chartHeight}>
+      <BarChart
+        layout="vertical"
+        data={data}
+        margin={{ top: 0, right: 56, bottom: 0, left: 0 }}
+        barCategoryGap={6}
+      >
+        <XAxis type="number" domain={[0, 100]} hide />
+        <YAxis
+          type="category"
+          dataKey="name"
+          width={72}
+          tick={{ fontSize: 11, fontWeight: 600, fill: "hsl(var(--muted-foreground))" }}
+          axisLine={false}
+          tickLine={false}
+        />
         <Tooltip
-          formatter={(value: number, name: string, props: any) => [
-            `${formatPercent(value)} (${formatCurrency(props.payload.amount)})`,
-            name,
+          cursor={{ fill: "hsl(var(--muted)/0.4)" }}
+          formatter={(value: number, _name: string, props: { payload?: { amount: number } }) => [
+            `${formatPercent(value)} · ${formatCurrency(props.payload?.amount ?? 0)}`,
+            "",
           ]}
           contentStyle={{
-            borderRadius: "12px",
+            borderRadius: "8px",
             border: "1px solid hsl(var(--border))",
-            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
-            fontSize: "13px",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07)",
+            fontSize: "12px",
             fontWeight: 600,
-            padding: "8px 12px",
+            padding: "6px 10px",
             backgroundColor: "hsl(var(--card))",
             color: "hsl(var(--foreground))",
           }}
-          itemStyle={{
-            color: "hsl(var(--foreground))",
-            fontWeight: 700,
-          }}
+          labelStyle={{ display: "none" }}
         />
-        <Legend
-          iconType="circle"
-          iconSize={8}
-          wrapperStyle={{ 
-            fontSize: "12px", 
-            fontWeight: 600, 
-            paddingTop: "20px",
-            color: "hsl(var(--muted-foreground))"
-          }}
-        />
-      </PieChart>
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={16}>
+          <LabelList
+            dataKey="value"
+            position="right"
+            formatter={(v: number) => `${v.toFixed(1)}%`}
+            style={{ fontSize: 11, fontWeight: 700, fill: "hsl(var(--foreground))" }}
+          />
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={ITEM_COLORS[entry.name] ?? "#6366f1"} />
+          ))}
+        </Bar>
+      </BarChart>
     </ResponsiveContainer>
   );
 }
