@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useId } from "react";
 import {
   calculatePricing,
   formatCurrency,
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { AlertCircle, Briefcase, Check, Copy, FileText, Info, Tag, TrendingUp, Wallet } from "lucide-react";
 
 function CompactInput({
+  id,
   label,
   value,
   onChange,
@@ -19,6 +20,7 @@ function CompactInput({
   disabled,
   placeholder,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -29,7 +31,7 @@ function CompactInput({
 }) {
   return (
     <div className="space-y-1">
-      <label className="block text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+      <label htmlFor={id} className="block text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
         {label}
       </label>
       <div
@@ -46,11 +48,13 @@ function CompactInput({
           </div>
         )}
         <input
+          id={id}
           type="number"
           min="0"
           step="0.01"
+          inputMode="decimal"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value.replace(",", "."))}
           disabled={disabled}
           placeholder={placeholder ?? "0"}
           className="flex-1 bg-transparent px-2.5 py-1.5 text-sm font-semibold outline-none min-w-0 disabled:cursor-not-allowed"
@@ -77,6 +81,7 @@ interface PrecificaFacilProps {
 }
 
 export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
+  const idPrefix = useId();
   const [cost, setCost] = useState("");
   const [taxType, setTaxType] = useState<TaxType>("simples");
   const [taxPercent, setTaxPercent] = useState("6");
@@ -85,6 +90,7 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
   const [operationalPercent, setOperationalPercent] = useState("5");
   const [profitPercent, setProfitPercent] = useState("20");
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
 
   const inputs = {
     cost: parseFloat(cost) || 0,
@@ -109,10 +115,17 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
 
   const handleCopyMarkup = useCallback(() => {
     if (result.isValid) {
-      navigator.clipboard.writeText(formatMarkupPercent(result.markupPercent)).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
+      navigator.clipboard
+        .writeText(formatMarkupPercent(result.markupPercent))
+        .then(() => {
+          setCopyError(null);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(() => {
+          setCopied(false);
+          setCopyError("Nao foi possivel copiar automaticamente. Copie manualmente o valor exibido.");
+        });
     }
   }, [result]);
 
@@ -139,6 +152,7 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
             <span className="text-xs font-bold uppercase tracking-wide text-foreground">Custo de Aquisição</span>
           </div>
           <CompactInput
+            id={`${idPrefix}-cost`}
             label="Custo unitário"
             value={cost}
             onChange={setCost}
@@ -158,11 +172,13 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
 
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-1.5">Regime</p>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5" role="radiogroup" aria-label="Regime tributario">
               {taxTypeOptions.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setTaxType(opt.value)}
+                  role="radio"
+                  aria-checked={taxType === opt.value}
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left flex items-center justify-between w-full",
                     taxType === opt.value
@@ -185,6 +201,7 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
           )}
 
           <CompactInput
+            id={`${idPrefix}-tax`}
             label="Alíquota de Imposto"
             value={taxPercent}
             onChange={setTaxPercent}
@@ -203,24 +220,28 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
           </div>
           <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
             <CompactInput
+              id={`${idPrefix}-card`}
               label="Taxa de Cartão"
               value={cardPercent}
               onChange={setCardPercent}
               suffix="%"
             />
             <CompactInput
+              id={`${idPrefix}-commission`}
               label="Comissão"
               value={commissionPercent}
               onChange={setCommissionPercent}
               suffix="%"
             />
             <CompactInput
+              id={`${idPrefix}-operational`}
               label="Custo Operacional"
               value={operationalPercent}
               onChange={setOperationalPercent}
               suffix="%"
             />
             <CompactInput
+              id={`${idPrefix}-profit`}
               label="Margem de Lucro"
               value={profitPercent}
               onChange={setProfitPercent}
@@ -273,6 +294,7 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
 
               <button
                 onClick={handleCopyMarkup}
+                aria-live="polite"
                 className={cn(
                   "w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold border transition-all",
                   copied
@@ -286,6 +308,9 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
                   <><Copy className="w-3.5 h-3.5" /> Copiar % Markup para o ERP</>
                 )}
               </button>
+              {copyError && (
+                <p className="text-[11px] text-red-600 font-medium">{copyError}</p>
+              )}
             </div>
           ) : (
             <div className="py-6 text-center text-muted-foreground">
