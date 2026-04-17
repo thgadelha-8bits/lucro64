@@ -7,6 +7,7 @@ function App() {
     cost: 0,
     sellingPrice: 0,
     isValid: false,
+    cardPercent: 0,
   });
 
   return (
@@ -31,6 +32,7 @@ function App() {
             basePrice={pricingState.sellingPrice}
             cost={pricingState.cost}
             isValid={pricingState.isValid}
+            cardPercent={pricingState.cardPercent}
           />
         </div>
       </main>

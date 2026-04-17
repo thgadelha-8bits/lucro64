@@ -7,6 +7,7 @@ interface ScenarioSimulatorProps {
   basePrice: number;
   cost: number;
   isValid: boolean;
+  cardPercent: number;
 }
 
 interface ScenarioConfig {
@@ -69,17 +70,17 @@ function SmallInput({
   );
 }
 
-function ScenarioCard({ config, idx, basePrice, cost }: {
+function ScenarioCard({ config, idx, basePrice, cost, cardPercent }: {
   config: ScenarioConfig;
   idx: number;
   basePrice: number;
   cost: number;
+  cardPercent: number;
 }) {
   const isHighlighted = idx === 1;
 
   const [discountPct, setDiscountPct] = useState("5");
   const [transactionFee, setTransactionFee] = useState("0");
-  const [cardFee1x, setCardFee1x] = useState("2.5");
   const [cardFee12x, setCardFee12x] = useState("4");
   const [installmentFee, setInstallmentFee] = useState("16");
 
@@ -95,10 +96,10 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
       { label: "Tarifa fixa", amount: -feeAmt, isDeduction: true },
     ];
   } else if (idx === 1) {
-    const feeAmt = basePrice * (parseFloat(cardFee1x) || 0) / 100;
+    const feeAmt = basePrice * cardPercent / 100;
     liquidoRecebido = basePrice - feeAmt;
     rows = [
-      { label: `Taxa ${parseFloat(cardFee1x) || 0}%`, amount: -feeAmt, isDeduction: true },
+      { label: `Taxa cartão (${cardPercent}%)`, amount: -feeAmt, isDeduction: true },
     ];
   } else {
     const interFeeAmt = basePrice * (parseFloat(cardFee12x) || 0) / 100;
@@ -136,24 +137,23 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
         </span>
       </div>
 
-      {/* Config inputs */}
-      <div className={cn("rounded-lg p-2", isHighlighted ? "bg-black/15" : "bg-muted/40 border border-border/50")}>
-        {idx === 0 && (
-          <div className="grid grid-cols-2 gap-2">
-            <SmallInput label="Desconto" value={discountPct} onChange={setDiscountPct} suffix="%" isHighlighted={isHighlighted} />
-            <SmallInput label="Tarifa" value={transactionFee} onChange={setTransactionFee} prefix="R$" isHighlighted={isHighlighted} />
-          </div>
-        )}
-        {idx === 1 && (
-          <SmallInput label="Taxa cartão" value={cardFee1x} onChange={setCardFee1x} suffix="%" isHighlighted={isHighlighted} />
-        )}
-        {idx === 2 && (
-          <div className="grid grid-cols-2 gap-2">
-            <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" isHighlighted={isHighlighted} />
-            <SmallInput label="Parcela." value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
-          </div>
-        )}
-      </div>
+      {/* Config inputs — only for À Vista and Cartão 12x */}
+      {idx !== 1 && (
+        <div className={cn("rounded-lg p-2", isHighlighted ? "bg-black/15" : "bg-muted/40 border border-border/50")}>
+          {idx === 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              <SmallInput label="Desconto" value={discountPct} onChange={setDiscountPct} suffix="%" isHighlighted={isHighlighted} />
+              <SmallInput label="Tarifa" value={transactionFee} onChange={setTransactionFee} prefix="R$" isHighlighted={isHighlighted} />
+            </div>
+          )}
+          {idx === 2 && (
+            <div className="grid grid-cols-2 gap-2">
+              <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" isHighlighted={isHighlighted} />
+              <SmallInput label="Parcela." value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Deduction rows */}
       <div className="space-y-1">
@@ -192,7 +192,7 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
   );
 }
 
-export function ScenarioSimulator({ basePrice, cost, isValid }: ScenarioSimulatorProps) {
+export function ScenarioSimulator({ basePrice, cost, isValid, cardPercent }: ScenarioSimulatorProps) {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-shrink-0 px-3 py-2.5 border-b border-border bg-muted/20">
@@ -219,6 +219,7 @@ export function ScenarioSimulator({ basePrice, cost, isValid }: ScenarioSimulato
               idx={idx}
               basePrice={basePrice}
               cost={cost}
+              cardPercent={cardPercent}
             />
           ))}
         </div>

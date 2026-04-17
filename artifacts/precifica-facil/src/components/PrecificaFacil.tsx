@@ -69,6 +69,7 @@ export interface PrecificaFacilState {
   cost: number;
   sellingPrice: number;
   isValid: boolean;
+  cardPercent: number;
 }
 
 interface PrecificaFacilProps {
@@ -102,8 +103,9 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
       cost: inputs.cost,
       sellingPrice: result.sellingPrice,
       isValid: result.isValid,
+      cardPercent: inputs.cardPercent,
     });
-  }, [inputs.cost, result.sellingPrice, result.isValid]);
+  }, [inputs.cost, result.sellingPrice, result.isValid, inputs.cardPercent]);
 
   const handleCopyMarkup = useCallback(() => {
     if (result.isValid) {
