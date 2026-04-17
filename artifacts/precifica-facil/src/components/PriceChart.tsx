@@ -1,3 +1,13 @@
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  LabelList,
+} from "recharts";
 import { PricingResult } from "@/lib/pricing";
 import { formatCurrency, formatPercent } from "@/lib/pricing";
 
@@ -33,7 +43,7 @@ export function PriceChart({
 }: PriceChartProps) {
   if (!result.isValid || result.sellingPrice <= 0) {
     return (
-      <div className="flex items-center justify-center h-[48px] text-muted-foreground/50 text-xs font-medium border border-dashed rounded-lg">
+      <div className="flex items-center justify-center h-[80px] text-muted-foreground/50 text-xs font-medium">
         Preencha os dados para visualizar
       </div>
     );
@@ -50,33 +60,55 @@ export function PriceChart({
     ...(profitPercent > 0 ? [{ name: "Lucro", value: profitPercent, amount: result.profitAmountChart }] : []),
   ].filter((d) => d.value > 0);
 
+  const chartHeight = Math.max(data.length * 28 + 8, 80);
+
   return (
-    <div className="space-y-2">
-      {/* Single stacked bar */}
-      <div className="flex h-5 rounded-md overflow-hidden w-full gap-px">
-        {data.map((item) => (
-          <div
-            key={item.name}
-            style={{ width: `${item.value}%`, backgroundColor: ITEM_COLORS[item.name] }}
-            title={`${item.name}: ${formatPercent(item.value)} · ${formatCurrency(item.amount)}`}
-            className="flex-shrink-0"
+    <ResponsiveContainer width="100%" height={chartHeight}>
+      <BarChart
+        layout="vertical"
+        data={data}
+        margin={{ top: 0, right: 56, bottom: 0, left: 0 }}
+        barCategoryGap={6}
+      >
+        <XAxis type="number" domain={[0, 100]} hide />
+        <YAxis
+          type="category"
+          dataKey="name"
+          width={72}
+          tick={{ fontSize: 11, fontWeight: 600, fill: "hsl(var(--muted-foreground))" }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <Tooltip
+          cursor={{ fill: "hsl(var(--muted)/0.4)" }}
+          formatter={(value: number, _name: string, props: { payload?: { amount: number } }) => [
+            `${formatPercent(value)} · ${formatCurrency(props.payload?.amount ?? 0)}`,
+            "",
+          ]}
+          contentStyle={{
+            borderRadius: "8px",
+            border: "1px solid hsl(var(--border))",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07)",
+            fontSize: "12px",
+            fontWeight: 600,
+            padding: "6px 10px",
+            backgroundColor: "hsl(var(--card))",
+            color: "hsl(var(--foreground))",
+          }}
+          labelStyle={{ display: "none" }}
+        />
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={16}>
+          <LabelList
+            dataKey="value"
+            position="right"
+            formatter={(v: number) => `${v.toFixed(1)}%`}
+            style={{ fontSize: 11, fontWeight: 700, fill: "hsl(var(--foreground))" }}
           />
-        ))}
-      </div>
-      {/* Legend */}
-      <div className="flex flex-wrap gap-x-3 gap-y-1">
-        {data.map((item) => (
-          <div key={item.name} className="flex items-center gap-1.5">
-            <div
-              className="w-2 h-2 rounded-full flex-shrink-0"
-              style={{ backgroundColor: ITEM_COLORS[item.name] }}
-            />
-            <span className="text-[10px] font-semibold text-muted-foreground">
-              {item.name} <span className="tabular-nums">{item.value.toFixed(1)}%</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={ITEM_COLORS[entry.name] ?? "#6366f1"} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
