@@ -81,7 +81,6 @@ function ScenarioCard({ config, idx, basePrice, cost, cardPercent }: {
 
   const [discountPct, setDiscountPct] = useState("5");
   const [transactionFee, setTransactionFee] = useState("0");
-  const [cardFee12x, setCardFee12x] = useState("4");
   const [installmentFee, setInstallmentFee] = useState("16");
 
   let rows: { label: string; amount: number; isDeduction?: boolean }[] = [];
@@ -102,12 +101,12 @@ function ScenarioCard({ config, idx, basePrice, cost, cardPercent }: {
       { label: `Taxa cartão (${cardPercent}%)`, amount: -feeAmt, isDeduction: true },
     ];
   } else {
-    const interFeeAmt = basePrice * (parseFloat(cardFee12x) || 0) / 100;
+    const interFeeAmt = basePrice * cardPercent / 100;
     const installFeeAmt = basePrice * (parseFloat(installmentFee) || 0) / 100;
     liquidoRecebido = basePrice - interFeeAmt - installFeeAmt;
     rows = [
-      { label: `Interm. ${parseFloat(cardFee12x) || 0}%`, amount: -interFeeAmt, isDeduction: true },
-      { label: `Parcela. ${parseFloat(installmentFee) || 0}%`, amount: -installFeeAmt, isDeduction: true },
+      { label: `Taxa maquininha (${cardPercent}%)`, amount: -interFeeAmt, isDeduction: true },
+      { label: `Taxa parcelamento (${parseFloat(installmentFee) || 0}%)`, amount: -installFeeAmt, isDeduction: true },
     ];
   }
 
@@ -147,10 +146,7 @@ function ScenarioCard({ config, idx, basePrice, cost, cardPercent }: {
             </div>
           )}
           {idx === 2 && (
-            <div className="grid grid-cols-2 gap-2">
-              <SmallInput label="Taxa maquininha" value={cardFee12x} onChange={setCardFee12x} suffix="%" isHighlighted={isHighlighted} />
-              <SmallInput label="Taxa parcelamento" value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
-            </div>
+            <SmallInput label="Taxa parcelamento" value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
           )}
         </div>
       )}
