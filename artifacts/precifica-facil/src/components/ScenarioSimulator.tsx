@@ -21,72 +21,16 @@ const SCENARIOS: ScenarioConfig[] = [
   { label: "Cartão 12x", subtitle: "Parcelado", icon: <Layers className="w-4 h-4" /> },
 ];
 
-type StatusLevel = "excellent" | "balanced" | "critical";
-
-function getStatus(margin: number): StatusLevel {
-  if (margin >= 25) return "excellent";
-  if (margin >= 15) return "balanced";
-  return "critical";
+function getMarginBadge(margin: number) {
+  if (margin >= 25) return { text: "Excelente", cls: "bg-emerald-100 text-emerald-700 border border-emerald-300" };
+  if (margin >= 15) return { text: "Equilibrado", cls: "bg-blue-100 text-blue-700 border border-blue-300" };
+  return { text: "Crítico", cls: "bg-red-100 text-red-700 border border-red-300" };
 }
 
-function getTheme(status: StatusLevel, isHighlighted: boolean) {
-  const themes = {
-    excellent: {
-      card:        isHighlighted ? "bg-emerald-600 border-emerald-700 shadow-lg" : "bg-emerald-50 border-emerald-200",
-      iconBg:      isHighlighted ? "bg-white/20 text-white"                       : "bg-emerald-100 text-emerald-700",
-      title:       isHighlighted ? "text-white"                                   : "text-emerald-900",
-      subtitle:    isHighlighted ? "text-white/70"                                : "text-emerald-600",
-      badge:       isHighlighted ? "bg-white/25 text-white"                       : "bg-emerald-100 text-emerald-700 border border-emerald-300",
-      badgeText:   "Excelente",
-      inputArea:   isHighlighted ? "bg-black/15"                                  : "bg-emerald-100/60 border border-emerald-200",
-      inputLabel:  isHighlighted ? "text-white/60"                                : "text-emerald-700/80",
-      rowLabel:    isHighlighted ? "text-white/70"                                : "text-emerald-700",
-      rowValue:    isHighlighted ? "text-white"                                   : "text-emerald-900",
-      deduction:   isHighlighted ? "text-red-200"                                 : "text-red-500",
-      divider:     isHighlighted ? "border-white/20"                              : "border-emerald-200",
-      liquidLabel: isHighlighted ? "text-white/80"                                : "text-emerald-800",
-      liquidValue: isHighlighted ? "text-white"                                   : "text-emerald-700",
-      marginValue: isHighlighted ? "text-white"                                   : "text-emerald-600",
-      lucroPre:    isHighlighted ? "text-white/60"                                : "text-emerald-600/80",
-    },
-    balanced: {
-      card:        isHighlighted ? "bg-blue-600 border-blue-700 shadow-lg"        : "bg-blue-50 border-blue-200",
-      iconBg:      isHighlighted ? "bg-white/20 text-white"                       : "bg-blue-100 text-blue-700",
-      title:       isHighlighted ? "text-white"                                   : "text-blue-900",
-      subtitle:    isHighlighted ? "text-white/70"                                : "text-blue-600",
-      badge:       isHighlighted ? "bg-white/25 text-white"                       : "bg-blue-100 text-blue-700 border border-blue-300",
-      badgeText:   "Equilibrado",
-      inputArea:   isHighlighted ? "bg-black/15"                                  : "bg-blue-100/60 border border-blue-200",
-      inputLabel:  isHighlighted ? "text-white/60"                                : "text-blue-700/80",
-      rowLabel:    isHighlighted ? "text-white/70"                                : "text-blue-700",
-      rowValue:    isHighlighted ? "text-white"                                   : "text-blue-900",
-      deduction:   isHighlighted ? "text-red-200"                                 : "text-red-500",
-      divider:     isHighlighted ? "border-white/20"                              : "border-blue-200",
-      liquidLabel: isHighlighted ? "text-white/80"                                : "text-blue-800",
-      liquidValue: isHighlighted ? "text-white"                                   : "text-blue-700",
-      marginValue: isHighlighted ? "text-white"                                   : "text-blue-600",
-      lucroPre:    isHighlighted ? "text-white/60"                                : "text-blue-600/80",
-    },
-    critical: {
-      card:        isHighlighted ? "bg-red-600 border-red-700 shadow-lg"          : "bg-red-50 border-red-200",
-      iconBg:      isHighlighted ? "bg-white/20 text-white"                       : "bg-red-100 text-red-700",
-      title:       isHighlighted ? "text-white"                                   : "text-red-900",
-      subtitle:    isHighlighted ? "text-white/70"                                : "text-red-500",
-      badge:       isHighlighted ? "bg-white/25 text-white"                       : "bg-red-100 text-red-700 border border-red-300",
-      badgeText:   "Crítico",
-      inputArea:   isHighlighted ? "bg-black/15"                                  : "bg-red-100/60 border border-red-200",
-      inputLabel:  isHighlighted ? "text-white/60"                                : "text-red-700/80",
-      rowLabel:    isHighlighted ? "text-white/70"                                : "text-red-700",
-      rowValue:    isHighlighted ? "text-white"                                   : "text-red-900",
-      deduction:   isHighlighted ? "text-red-200"                                 : "text-red-500",
-      divider:     isHighlighted ? "border-white/20"                              : "border-red-200",
-      liquidLabel: isHighlighted ? "text-white/80"                                : "text-red-800",
-      liquidValue: isHighlighted ? "text-white"                                   : "text-red-700",
-      marginValue: isHighlighted ? "text-white"                                   : "text-red-600",
-      lucroPre:    isHighlighted ? "text-white/60"                                : "text-red-500/80",
-    },
-  };
-  return themes[status];
+function getMarginColor(margin: number) {
+  if (margin >= 25) return "text-emerald-600";
+  if (margin >= 15) return "text-blue-600";
+  return "text-red-600";
 }
 
 function SmallInput({
@@ -95,18 +39,18 @@ function SmallInput({
   onChange,
   suffix,
   prefix,
-  labelClass,
+  isHighlighted,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   suffix?: string;
   prefix?: string;
-  labelClass?: string;
+  isHighlighted?: boolean;
 }) {
   return (
     <div className="space-y-0.5 min-w-0">
-      <label className={cn("block text-[10px] font-bold uppercase tracking-wide truncate", labelClass ?? "text-muted-foreground")}>
+      <label className={cn("block text-[10px] font-bold uppercase tracking-wide truncate", isHighlighted ? "text-white/60" : "text-muted-foreground")}>
         {label}
       </label>
       <div className="flex items-center rounded-md border border-input bg-background text-xs overflow-hidden focus-within:ring-1 focus-within:ring-primary/30 focus-within:border-primary transition-all">
@@ -168,57 +112,60 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
 
   const lucro = liquidoRecebido - cost;
   const margin = liquidoRecebido > 0 ? (lucro / liquidoRecebido) * 100 : 0;
-  const status = getStatus(margin);
-  const t = getTheme(status, isHighlighted);
+  const badge = getMarginBadge(margin);
+  const marginColor = getMarginColor(margin);
 
   return (
-    <div className={cn("rounded-xl border p-3 flex flex-col gap-2.5 transition-all duration-300", t.card)}>
+    <div className={cn(
+      "rounded-xl border p-3 flex flex-col gap-2.5 transition-all",
+      isHighlighted ? "bg-primary border-primary shadow-md" : "bg-card border-border"
+    )}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
-          <div className={cn("p-1.5 rounded-lg flex-shrink-0", t.iconBg)}>
+          <div className={cn("p-1.5 rounded-lg flex-shrink-0", isHighlighted ? "bg-white/20 text-white" : "bg-primary/5 text-primary")}>
             {config.icon}
           </div>
           <div className="min-w-0">
-            <p className={cn("text-sm font-bold leading-tight", t.title)}>{config.label}</p>
-            <p className={cn("text-[10px]", t.subtitle)}>{config.subtitle}</p>
+            <p className={cn("text-sm font-bold leading-tight", isHighlighted ? "text-white" : "text-foreground")}>{config.label}</p>
+            <p className={cn("text-[10px]", isHighlighted ? "text-white/70" : "text-muted-foreground")}>{config.subtitle}</p>
           </div>
         </div>
-        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0", t.badge)}>
-          {t.badgeText}
+        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0", badge.cls)}>
+          {badge.text}
         </span>
       </div>
 
       {/* Config inputs */}
-      <div className={cn("rounded-lg p-2", t.inputArea)}>
+      <div className={cn("rounded-lg p-2", isHighlighted ? "bg-black/15" : "bg-muted/40 border border-border/50")}>
         {idx === 0 && (
           <div className="grid grid-cols-2 gap-2">
-            <SmallInput label="Desconto" value={discountPct} onChange={setDiscountPct} suffix="%" labelClass={t.inputLabel} />
-            <SmallInput label="Tarifa" value={transactionFee} onChange={setTransactionFee} prefix="R$" labelClass={t.inputLabel} />
+            <SmallInput label="Desconto" value={discountPct} onChange={setDiscountPct} suffix="%" isHighlighted={isHighlighted} />
+            <SmallInput label="Tarifa" value={transactionFee} onChange={setTransactionFee} prefix="R$" isHighlighted={isHighlighted} />
           </div>
         )}
         {idx === 1 && (
-          <SmallInput label="Taxa cartão" value={cardFee1x} onChange={setCardFee1x} suffix="%" labelClass={t.inputLabel} />
+          <SmallInput label="Taxa cartão" value={cardFee1x} onChange={setCardFee1x} suffix="%" isHighlighted={isHighlighted} />
         )}
         {idx === 2 && (
           <div className="grid grid-cols-2 gap-2">
-            <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" labelClass={t.inputLabel} />
-            <SmallInput label="Parcela." value={installmentFee} onChange={setInstallmentFee} suffix="%" labelClass={t.inputLabel} />
+            <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" isHighlighted={isHighlighted} />
+            <SmallInput label="Parcela." value={installmentFee} onChange={setInstallmentFee} suffix="%" isHighlighted={isHighlighted} />
           </div>
         )}
       </div>
 
       {/* Deduction rows */}
       <div className="space-y-1">
-        <div className="flex justify-between text-xs py-0.5">
-          <span className={t.rowLabel}>Preço Bruto</span>
-          <span className={cn("font-semibold tabular-nums", t.rowValue)}>{formatCurrency(basePrice)}</span>
+        <div className={cn("flex justify-between text-xs py-0.5", isHighlighted ? "text-white/80" : "text-foreground")}>
+          <span className={isHighlighted ? "text-white/70" : "text-muted-foreground"}>Preço Bruto</span>
+          <span className="font-semibold tabular-nums">{formatCurrency(basePrice)}</span>
         </div>
         {rows.map((row, i) => (
           row.amount !== 0 && (
-            <div key={i} className={cn("flex justify-between text-xs py-0.5 border-t border-dashed", t.divider)}>
-              <span className={t.rowLabel}>{row.label}</span>
-              <span className={cn("font-semibold tabular-nums", t.deduction)}>
+            <div key={i} className={cn("flex justify-between text-xs py-0.5 border-t border-dashed", isHighlighted ? "border-white/10" : "border-border")}>
+              <span className={isHighlighted ? "text-white/70" : "text-muted-foreground"}>{row.label}</span>
+              <span className={cn("font-semibold tabular-nums", isHighlighted ? "text-red-300" : "text-red-500")}>
                 {row.amount < 0 ? `- ${formatCurrency(Math.abs(row.amount))}` : formatCurrency(row.amount)}
               </span>
             </div>
@@ -227,16 +174,16 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
       </div>
 
       {/* Result */}
-      <div className={cn("border-t pt-2 space-y-1", t.divider)}>
+      <div className={cn("border-t pt-2 space-y-1", isHighlighted ? "border-white/20" : "border-border")}>
         <div className="flex justify-between items-center">
-          <span className={cn("text-[11px] font-bold uppercase tracking-wide", t.liquidLabel)}>Líquido</span>
-          <span className={cn("text-base font-extrabold tabular-nums", t.liquidValue)}>{formatCurrency(liquidoRecebido)}</span>
+          <span className={cn("text-[11px] font-bold uppercase tracking-wide", isHighlighted ? "text-white/80" : "text-muted-foreground")}>Líquido</span>
+          <span className={cn("text-base font-extrabold tabular-nums", isHighlighted ? "text-white" : "text-primary")}>{formatCurrency(liquidoRecebido)}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className={cn("text-[10px]", t.lucroPre)}>
+          <span className={cn("text-[10px]", isHighlighted ? "text-white/60" : "text-muted-foreground")}>
             Lucro: {formatCurrency(lucro)}
           </span>
-          <span className={cn("text-sm font-bold tabular-nums", t.marginValue)}>
+          <span className={cn("text-sm font-bold tabular-nums", isHighlighted ? "text-white" : marginColor)}>
             {formatPercent(margin)}
           </span>
         </div>
