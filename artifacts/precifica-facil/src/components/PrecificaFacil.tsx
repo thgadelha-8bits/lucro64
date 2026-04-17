@@ -122,9 +122,9 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
   ];
 
   return (
-    <div className="h-full grid grid-cols-[240px_minmax(0,1fr)] divide-x divide-border">
+    <div className="flex flex-col md:h-full md:grid md:grid-cols-[240px_minmax(0,1fr)] md:divide-x divide-border">
       {/* LEFT — Inputs */}
-      <div className="overflow-y-auto p-4 space-y-4">
+      <div className="p-4 space-y-4 md:overflow-y-auto">
         {result.errorMessage && (
           <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
             <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
@@ -241,7 +241,7 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
       </div>
 
       {/* RIGHT — Results */}
-      <div className="overflow-y-auto p-4 flex flex-col gap-3">
+      <div className="p-4 flex flex-col gap-3 md:overflow-y-auto border-t md:border-t-0 border-border">
         {/* Price hero */}
         <div className="bg-card border border-border rounded-xl p-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-primary" />

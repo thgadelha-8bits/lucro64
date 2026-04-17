@@ -11,7 +11,7 @@ function App() {
   });
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden bg-background">
       <header className="flex-shrink-0 border-b border-border bg-card px-5 py-2.5 flex items-center gap-2.5">
         <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -25,9 +25,9 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden grid grid-cols-[minmax(0,1fr)_280px]">
+      <main className="flex-1 md:overflow-hidden flex flex-col md:grid md:grid-cols-[minmax(0,1fr)_280px]">
         <PrecificaFacil onStateChange={setPricingState} />
-        <div className="border-l border-border overflow-hidden">
+        <div className="border-t md:border-t-0 md:border-l border-border md:overflow-hidden">
           <ScenarioSimulator
             basePrice={pricingState.sellingPrice}
             cost={pricingState.cost}

@@ -190,7 +190,7 @@ function ScenarioCard({ config, idx, basePrice, cost, cardPercent }: {
 
 export function ScenarioSimulator({ basePrice, cost, isValid, cardPercent }: ScenarioSimulatorProps) {
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="flex flex-col md:h-full md:overflow-hidden">
       <div className="flex-shrink-0 px-3 py-2.5 border-b border-border bg-muted/20">
         <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Simulador de Cenários</h2>
         <p className="text-[10px] text-muted-foreground mt-0.5">Compare modalidades de pagamento</p>
