@@ -163,6 +163,9 @@ importers:
       '@tailwindcss/oxide-win32-x64-msvc':
         specifier: ^4.2.1
         version: 4.2.1
+      '@tailwindcss/vite':
+        specifier: ^4.1.14
+        version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
       lightningcss-win32-x64-msvc:
         specifier: ^1.32.0
         version: 1.32.0
@@ -172,6 +175,9 @@ importers:
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2)
 
   artifacts/api-server:
     dependencies:
