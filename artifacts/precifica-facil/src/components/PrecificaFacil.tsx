@@ -120,7 +120,7 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
   ];
 
   return (
-    <div className="h-full grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] divide-x divide-border">
+    <div className="h-full grid grid-cols-[240px_minmax(0,1fr)] divide-x divide-border">
       {/* LEFT — Inputs */}
       <div className="overflow-y-auto p-4 space-y-4">
         {result.errorMessage && (
@@ -156,20 +156,20 @@ export function PrecificaFacil({ onStateChange }: PrecificaFacilProps) {
 
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-1.5">Regime</p>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="flex flex-col gap-1.5">
               {taxTypeOptions.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setTaxType(opt.value)}
                   className={cn(
-                    "px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left flex items-center justify-between",
+                    "px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-left flex items-center justify-between w-full",
                     taxType === opt.value
                       ? "bg-primary/10 text-primary border-primary"
                       : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
                   )}
                 >
                   {opt.label}
-                  {taxType === opt.value && <Check className="w-3 h-3" />}
+                  {taxType === opt.value && <Check className="w-3 h-3 flex-shrink-0" />}
                 </button>
               ))}
             </div>
