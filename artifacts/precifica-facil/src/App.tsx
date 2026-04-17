@@ -20,7 +20,7 @@ function App() {
           </svg>
         </div>
         <div>
-          <h1 className="text-sm font-bold text-foreground leading-tight">Precifica Fácil</h1>
+          <h1 className="text-sm font-bold text-foreground leading-tight">Lucro64</h1>
           <p className="text-[10px] text-muted-foreground leading-tight">Calculadora de Margem & Preço</p>
         </div>
       </header>
