@@ -207,7 +207,7 @@ export function ScenarioSimulator({ basePrice, cost, isValid, cardPercent }: Sce
           </p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        <div className="md:flex-1 md:overflow-y-auto p-3 space-y-3">
           {SCENARIOS.map((scenario, idx) => (
             <ScenarioCard
               key={idx}
