@@ -16,9 +16,9 @@ interface ScenarioConfig {
 }
 
 const SCENARIOS: ScenarioConfig[] = [
-  { label: "À Vista", subtitle: "PIX / Dinheiro", icon: <Banknote className="w-4 h-4" /> },
-  { label: "Cartão 1X", subtitle: "Débito / Crédito", icon: <CreditCard className="w-4 h-4" /> },
-  { label: "Cartão 12x", subtitle: "Parcelado", icon: <Layers className="w-4 h-4" /> },
+  { label: "À Vista", subtitle: "PIX / Dinheiro", icon: <Banknote className="w-3.5 h-3.5" /> },
+  { label: "Cartão 1X", subtitle: "Débito / Crédito", icon: <CreditCard className="w-3.5 h-3.5" /> },
+  { label: "Cartão 12x", subtitle: "Parcelado", icon: <Layers className="w-3.5 h-3.5" /> },
 ];
 
 function getMarginBadge(margin: number) {
@@ -39,18 +39,27 @@ function SmallInput({
   onChange,
   suffix,
   prefix,
+  highlighted,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   suffix?: string;
   prefix?: string;
+  highlighted?: boolean;
 }) {
   return (
     <div className="space-y-0.5 min-w-0">
-      <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground truncate">{label}</label>
-      <div className="flex items-center rounded-md border border-input bg-background text-xs overflow-hidden focus-within:ring-1 focus-within:ring-primary/30 focus-within:border-primary transition-all">
-        {prefix && <span className="pl-1.5 pr-1 text-muted-foreground font-semibold flex-shrink-0">{prefix}</span>}
+      <label className={cn("block text-[10px] font-bold uppercase tracking-wide truncate", highlighted ? "text-white/60" : "text-muted-foreground")}>
+        {label}
+      </label>
+      <div className={cn(
+        "flex items-center rounded-md border text-xs overflow-hidden transition-all focus-within:ring-1",
+        highlighted
+          ? "bg-white/10 border-white/20 text-white focus-within:border-white/50 focus-within:ring-white/20"
+          : "bg-background border-input focus-within:border-primary focus-within:ring-primary/20"
+      )}>
+        {prefix && <span className={cn("pl-1.5 pr-1 font-semibold flex-shrink-0", highlighted ? "text-white/50" : "text-muted-foreground")}>{prefix}</span>}
         <input
           type="number"
           min="0"
@@ -59,7 +68,7 @@ function SmallInput({
           onChange={(e) => onChange(e.target.value)}
           className="flex-1 bg-transparent px-1.5 py-1 font-semibold outline-none min-w-0 w-full"
         />
-        {suffix && <span className="pr-1.5 pl-1 text-muted-foreground font-semibold flex-shrink-0">{suffix}</span>}
+        {suffix && <span className={cn("pr-1.5 pl-1 font-semibold flex-shrink-0", highlighted ? "text-white/50" : "text-muted-foreground")}>{suffix}</span>}
       </div>
     </div>
   );
@@ -79,30 +88,28 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
   const [cardFee12x, setCardFee12x] = useState("4");
   const [installmentFee, setInstallmentFee] = useState("16");
 
-  let rows: { label: string; amount: number; isDeduction?: boolean }[] = [];
+  let deductions: { label: string; amount: number }[] = [];
   let liquidoRecebido = 0;
 
   if (idx === 0) {
     const discountAmt = basePrice * (parseFloat(discountPct) || 0) / 100;
     const feeAmt = parseFloat(transactionFee) || 0;
     liquidoRecebido = basePrice - discountAmt - feeAmt;
-    rows = [
-      { label: `Desconto ${parseFloat(discountPct) || 0}%`, amount: -discountAmt, isDeduction: true },
-      { label: "Tarifa fixa", amount: -feeAmt, isDeduction: true },
+    deductions = [
+      { label: `Desconto (${parseFloat(discountPct) || 0}%)`, amount: discountAmt },
+      { label: "Tarifa fixa", amount: feeAmt },
     ];
   } else if (idx === 1) {
     const feeAmt = basePrice * (parseFloat(cardFee1x) || 0) / 100;
     liquidoRecebido = basePrice - feeAmt;
-    rows = [
-      { label: `Taxa ${parseFloat(cardFee1x) || 0}%`, amount: -feeAmt, isDeduction: true },
-    ];
+    deductions = [{ label: `Taxa (${parseFloat(cardFee1x) || 0}%)`, amount: feeAmt }];
   } else {
     const interFeeAmt = basePrice * (parseFloat(cardFee12x) || 0) / 100;
     const installFeeAmt = basePrice * (parseFloat(installmentFee) || 0) / 100;
     liquidoRecebido = basePrice - interFeeAmt - installFeeAmt;
-    rows = [
-      { label: `Interm. ${parseFloat(cardFee12x) || 0}%`, amount: -interFeeAmt, isDeduction: true },
-      { label: `Parcela. ${parseFloat(installmentFee) || 0}%`, amount: -installFeeAmt, isDeduction: true },
+    deductions = [
+      { label: `Interm. (${parseFloat(cardFee12x) || 0}%)`, amount: interFeeAmt },
+      { label: `Parcel. (${parseFloat(installmentFee) || 0}%)`, amount: installFeeAmt },
     ];
   }
 
@@ -113,75 +120,72 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
 
   return (
     <div className={cn(
-      "rounded-xl border p-3 flex flex-col gap-2.5 transition-all",
-      isHighlighted ? "bg-primary border-primary shadow-md" : "bg-card border-border"
+      "h-full flex flex-col p-3 gap-2",
+      isHighlighted ? "bg-primary" : "bg-card"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className={cn("p-1.5 rounded-lg flex-shrink-0", isHighlighted ? "bg-white/20 text-white" : "bg-primary/5 text-primary")}>
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className={cn("p-1 rounded-md flex-shrink-0", isHighlighted ? "bg-white/20 text-white" : "bg-primary/5 text-primary")}>
             {config.icon}
           </div>
           <div className="min-w-0">
-            <p className={cn("text-sm font-bold leading-tight", isHighlighted ? "text-white" : "text-foreground")}>{config.label}</p>
-            <p className={cn("text-[10px]", isHighlighted ? "text-white/70" : "text-muted-foreground")}>{config.subtitle}</p>
+            <p className={cn("text-xs font-bold leading-tight", isHighlighted ? "text-white" : "text-foreground")}>{config.label}</p>
+            <p className={cn("text-[10px]", isHighlighted ? "text-white/60" : "text-muted-foreground")}>{config.subtitle}</p>
           </div>
         </div>
-        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0", isHighlighted ? "bg-white/20 text-white" : badge.cls)}>
+        <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ml-2", isHighlighted ? "bg-white/20 text-white" : badge.cls)}>
           {badge.text}
         </span>
       </div>
 
       {/* Config inputs */}
-      <div className={cn("rounded-lg p-2", isHighlighted ? "bg-black/15" : "bg-muted/40 border border-border/50")}>
+      <div className={cn("rounded-lg p-2 flex-shrink-0", isHighlighted ? "bg-black/15" : "bg-muted/40 border border-border/50")}>
         {idx === 0 && (
           <div className="grid grid-cols-2 gap-2">
-            <SmallInput label="Desconto" value={discountPct} onChange={setDiscountPct} suffix="%" />
-            <SmallInput label="Tarifa" value={transactionFee} onChange={setTransactionFee} prefix="R$" />
+            <SmallInput label="Desconto" value={discountPct} onChange={setDiscountPct} suffix="%" highlighted={isHighlighted} />
+            <SmallInput label="Tarifa" value={transactionFee} onChange={setTransactionFee} prefix="R$" highlighted={isHighlighted} />
           </div>
         )}
         {idx === 1 && (
-          <SmallInput label="Taxa cartão" value={cardFee1x} onChange={setCardFee1x} suffix="%" />
+          <SmallInput label="Taxa cartão" value={cardFee1x} onChange={setCardFee1x} suffix="%" highlighted={isHighlighted} />
         )}
         {idx === 2 && (
           <div className="grid grid-cols-2 gap-2">
-            <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" />
-            <SmallInput label="Parcela." value={installmentFee} onChange={setInstallmentFee} suffix="%" />
+            <SmallInput label="Interm." value={cardFee12x} onChange={setCardFee12x} suffix="%" highlighted={isHighlighted} />
+            <SmallInput label="Parcel." value={installmentFee} onChange={setInstallmentFee} suffix="%" highlighted={isHighlighted} />
           </div>
         )}
       </div>
 
       {/* Deduction rows */}
-      <div className="space-y-1">
-        <div className={cn("flex justify-between text-xs py-0.5", isHighlighted ? "text-white/80" : "text-foreground")}>
-          <span className={isHighlighted ? "text-white/70" : "text-muted-foreground"}>Preço Bruto</span>
+      <div className="flex-1 space-y-1 min-h-0">
+        <div className={cn("flex justify-between text-[11px]", isHighlighted ? "text-white/80" : "")}>
+          <span className={isHighlighted ? "text-white/60" : "text-muted-foreground"}>Preço Bruto</span>
           <span className="font-semibold tabular-nums">{formatCurrency(basePrice)}</span>
         </div>
-        {rows.map((row, i) => (
-          row.amount !== 0 && (
-            <div key={i} className="flex justify-between text-xs py-0.5 border-t border-dashed border-current/10">
-              <span className={isHighlighted ? "text-white/70" : "text-muted-foreground"}>{row.label}</span>
-              <span className={cn("font-semibold tabular-nums", isHighlighted ? "text-red-300" : "text-red-500")}>
-                {row.amount < 0 ? `- ${formatCurrency(Math.abs(row.amount))}` : formatCurrency(row.amount)}
-              </span>
-            </div>
-          )
+        {deductions.filter(d => d.amount !== 0).map((d, i) => (
+          <div key={i} className={cn("flex justify-between text-[11px]", isHighlighted ? "" : "")}>
+            <span className={isHighlighted ? "text-white/60" : "text-muted-foreground"}>{d.label}</span>
+            <span className={cn("font-semibold tabular-nums", isHighlighted ? "text-red-300" : "text-red-500")}>
+              - {formatCurrency(d.amount)}
+            </span>
+          </div>
         ))}
       </div>
 
       {/* Result */}
-      <div className={cn("border-t pt-2 space-y-1", isHighlighted ? "border-white/20" : "border-border")}>
-        <div className="flex justify-between items-center">
-          <span className={cn("text-[11px] font-bold uppercase tracking-wide", isHighlighted ? "text-white/80" : "text-muted-foreground")}>Líquido</span>
-          <span className={cn("text-base font-extrabold tabular-nums", isHighlighted ? "text-white" : "text-primary")}>{formatCurrency(liquidoRecebido)}</span>
+      <div className={cn("border-t pt-2 flex items-end justify-between flex-shrink-0", isHighlighted ? "border-white/20" : "border-border")}>
+        <div>
+          <p className={cn("text-[10px] font-bold uppercase tracking-wide", isHighlighted ? "text-white/60" : "text-muted-foreground")}>Líquido</p>
+          <p className={cn("text-base font-extrabold tabular-nums leading-tight", isHighlighted ? "text-white" : "text-primary")}>{formatCurrency(liquidoRecebido)}</p>
+          <p className={cn("text-[10px]", isHighlighted ? "text-white/50" : "text-muted-foreground")}>Lucro: {formatCurrency(lucro)}</p>
         </div>
-        <div className="flex justify-between items-center">
-          <span className={cn("text-[10px]", isHighlighted ? "text-white/60" : "text-muted-foreground")}>
-            Lucro: {formatCurrency(lucro)}
-          </span>
-          <span className={cn("text-sm font-bold tabular-nums", isHighlighted ? "text-white" : marginColor)}>
+        <div className="text-right">
+          <p className={cn("text-[10px] font-bold uppercase tracking-wide mb-0.5", isHighlighted ? "text-white/60" : "text-muted-foreground")}>Margem</p>
+          <p className={cn("text-xl font-extrabold tabular-nums leading-none", isHighlighted ? "text-white" : marginColor)}>
             {formatPercent(margin)}
-          </span>
+          </p>
         </div>
       </div>
     </div>
@@ -190,24 +194,30 @@ function ScenarioCard({ config, idx, basePrice, cost }: {
 
 export function ScenarioSimulator({ basePrice, cost, isValid }: ScenarioSimulatorProps) {
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-shrink-0 px-3 py-2.5 border-b border-border bg-muted/20">
-        <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Simulador de Cenários</h2>
-        <p className="text-[10px] text-muted-foreground mt-0.5">Compare modalidades de pagamento</p>
+    <div className="h-full flex flex-col overflow-hidden bg-background">
+      {/* Title bar */}
+      <div className="flex-shrink-0 px-4 py-1.5 border-b border-border bg-muted/20 flex items-center gap-3">
+        <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Simulador de Cenários</h2>
+        {(!isValid || basePrice <= 0 || cost <= 0) && (
+          <span className="text-[10px] text-muted-foreground/60 italic">— preencha o custo para ativar</span>
+        )}
       </div>
 
+      {/* 3 cards in a row */}
       {!isValid || basePrice <= 0 || cost <= 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-            <CreditCard className="w-5 h-5 text-muted-foreground/40" />
-          </div>
-          <p className="text-xs font-semibold text-foreground mb-1">Aguardando dados</p>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Preencha o custo e os percentuais para ativar o simulador.
-          </p>
+        <div className="flex-1 grid grid-cols-3 divide-x divide-border">
+          {SCENARIOS.map((scenario, idx) => (
+            <div key={idx} className="flex flex-col items-center justify-center gap-2 p-4 text-center opacity-40">
+              <div className="p-2 rounded-lg bg-muted/50 text-muted-foreground">{scenario.icon}</div>
+              <div>
+                <p className="text-xs font-bold text-foreground">{scenario.label}</p>
+                <p className="text-[10px] text-muted-foreground">{scenario.subtitle}</p>
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        <div className="flex-1 grid grid-cols-3 divide-x divide-border overflow-hidden">
           {SCENARIOS.map((scenario, idx) => (
             <ScenarioCard
               key={idx}

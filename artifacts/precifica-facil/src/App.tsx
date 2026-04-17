@@ -24,9 +24,14 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden grid grid-cols-[minmax(0,1fr)_280px]">
-        <PrecificaFacil onStateChange={setPricingState} />
-        <div className="border-l border-border overflow-hidden">
+      <main className="flex-1 overflow-hidden flex flex-col">
+        {/* Top: calculator — 2 columns (inputs | results) */}
+        <div className="flex-1 overflow-hidden border-b border-border">
+          <PrecificaFacil onStateChange={setPricingState} />
+        </div>
+
+        {/* Bottom: scenario simulator — full width, 3 cards side by side */}
+        <div className="flex-shrink-0 h-[230px]">
           <ScenarioSimulator
             basePrice={pricingState.sellingPrice}
             cost={pricingState.cost}
